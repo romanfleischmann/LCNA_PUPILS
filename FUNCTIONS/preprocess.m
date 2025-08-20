@@ -1,30 +1,35 @@
-%%%% PREPROCESS %%%%
-clear all
+function [pupdat unusable_left unusable_right] = preprocess(bufferData)
 
+% for this functin to work PUPILs toolbox needs to be accessible
+% the function takes -bufferData- and preprocesses it, also calculates how
+% much data is unusable (per eye)
 
-% PUPILS (insert link here)
+% preprocessing steps
+% 1. Set all marked "blink" to NaN (per eye)
 
-% add paths for windows
-cd('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS') %windowspath
-addpath(genpath('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS'))
+% 2. Set all values over 1000 to NaN (corrupted data)
 
-% load random data
-load('G:\My Drive\SHARE\SHARE4ANDREW\raw\subjectBAP196_Aoddball_session3_run5_6_20_15_14.mat')
+% 3. Find more blinks based on the velocity (bc. we do not trust the
+% markings from the tracker alone) and set to NaN (per eye)
 
+% 4. interpolate! 
+% All periods shorter than 500 ms (1000 samples) with at
+% least 100 ms (200 samples) of healthy pupil trace on each side are
+% considered good interpolation! :)
+% All other areas are considered bad :( and will be marked as excluded. To
+% prevent edge-artifacts when filtering bad areas are interpolated
+% nevertheless
 
-%% increase signal-to-noise ratio in workspace 
-% (what are all thse variables anyways)
+% 5. Filtering (attenuation above 5 Hz, zero-phase)
 
-clearvars -except SUBJECT audiocompleteTimeD baseName baseNameString bin_buttonpress bin_buttonpress2 blankStartTimeD1 bufferData ButtonResponse ButtonRT ButtonRT2 ConfidenceRate EndofTrial_timeD ExpStartTimeD feedback FeedbackMessage fixStartTimeD1 fixStartTimeP1 fname1 grip_baseline grip_duration gripforce_fname GripRelaxTime inter_buttonpress inter_buttonpress2 iscorr isoddball isStrengthHi numCycles numreps numsegs NumStim numTrialReps relaxStartTimeD1 relaxStartTimeP1 Resp1_Duration Resp1EndTimeD Resp1StartTimeD Resp2_Duration Resp2EndTimeD Resp2StartTimeD SoundStartTimeD SoundStartTimeD1 StimLev StimLev1 stimulusStartTimeD
-%% Initialize Pupil Data
+%%% COLUMNS %%%
 
 % BufferData = Pupil data
 pupdat = bufferData;
-
 % delete "raw" columns
 pupdat(:,17:20) = [];
 
-% columns are these:
+% column names
 time      = 1;   % (VPixx time, in seconds)
 leftX     = 2;   % Left Eye X (in pixels)
 leftY     = 3;   % Left Eye Y (in pixels)
@@ -54,20 +59,6 @@ pupright_excl   = 24; % pupright interpolated but NOT safe to use, excluded!
 %% initialize parameters
 samplingfreq = 2000; %Hz, because two samples per millisecond. But this does not track with the given frequency (1000 Hz)
 
-
-%% normalize timestamp pupdata
-
-% deleting first five rows, this is because of the -!!WEIRD ALERT!!- from the readme file
-% 5 samples seems to be a safe amount to exclude
-pupdat = pupdat(5:end,:);
-
-% normalize timestamp bc. for some reason it starts at 3000 seconds
-% from the timestamp i am assuming the sampling frequency to be 2000Hz!!
-% (DOUBLECHECK THIS)
-pupdat(:,time)=pupdat(:,time)-pupdat(1,time);
-
-%% normalize timestamp of everything else
-
 %% CLEANING THE EYES
 % excluding all data where: 
 % - blink = 1
@@ -90,7 +81,7 @@ pupdat_right = horzcat(time_standIn', pupdat(:,rightX:pupright));
 
 %set structure
 options = struct;
-options.fs = 2000;                 % sampling frequency (Hz)
+options.fs = samplingfreq;                 % sampling frequency (Hz)
 options.blink_rule = 'vel';       % Rule for blink detection 'std' / 've
 % options.pre_blink_t   = 100;      % region to interpolate before blink (ms)
 % options.post_blink_t  = 200;      % region to interpolate after blink (ms)
@@ -103,8 +94,6 @@ options.blink_rule = 'vel';       % Rule for blink detection 'std' / 've
 % options.low_pass_fc   = 10;       % Low-pass filter cut-off frequency (Hz)
 % options.screen_distance = 7000; % Screen distance in mm %%THIS IS AN ESTIMATE; CHANGE FOR REAL VALUE ONCE YOU FIND OUT
 % options.dpi = 72; % pixels/inches %THIS IS AN ESTIMATE; CHANGE FOR REAL VALUE ONCE YOU FIND OUT
-% 
-% [pupdat_left_proc pupdat_left_info] = processPupilData(pupdat_left, options);
 
 %find blinks with velocity based function 
 % velocities faster than three times the median root mean square value of
@@ -132,8 +121,8 @@ pupdat(pupdat(:,velblinkright) == 1,pupright) = nan;
 % interpolate all other NaN and mark the periods as "bad"
 % these are basically excluded periods! Interpolation is just for cleaner
 % filtering later on.
-[pupleft_interpolated, interpol_bad_left] = interpolate_all_nans(pupleft_interpolated);
-[pupright_interpolated, interpol_bad_right] = interpolate_all_nans(pupright_interpolated);
+[pupleft_interpolated, interpol_bad_left] = interpolate_all_nans_fixed(pupleft_interpolated);
+[pupright_interpolated, interpol_bad_right] = interpolate_all_nans_fixed(pupright_interpolated);
 
 % add to main pupdat
 pupdat = horzcat(pupdat, pupleft_interpolated, interpol_good_left, interpol_bad_left, pupright_interpolated, interpol_good_right, interpol_bad_right);
@@ -152,12 +141,8 @@ pupdat(:,pupright_proc) = filtfilt(b, a, pupdat(:,pupright_proc));
 
 clearvars b a;
 
-%% de-clutter workspace again
-clearvars -except pupdat samplingfreq SUBJECT audiocompleteTimeD baseName baseNameString bin_buttonpress bin_buttonpress2 blankStartTimeD1 ButtonResponse ButtonRT ButtonRT2 ConfidenceRate EndofTrial_timeD ExpStartTimeD feedback FeedbackMessage fixStartTimeD1 fixStartTimeP1 fname1 grip_baseline grip_duration gripforce_fname GripRelaxTime inter_buttonpress inter_buttonpress2 iscorr isoddball isStrengthHi numCycles numreps numsegs NumStim numTrialReps relaxStartTimeD1 relaxStartTimeP1 Resp1_Duration Resp1EndTimeD Resp1StartTimeD Resp2_Duration Resp2EndTimeD Resp2StartTimeD SoundStartTimeD SoundStartTimeD1 StimLev StimLev1 stimulusStartTimeD
+%% calculate unusable
 
-
-
-
-
-
+unusable_left = (sum(pupdat(:,pupleft_excl))/height(pupdat)) * 100; %percentage of unsuable data, left pupil
+unusable_right = (sum(pupdat(:,pupright_excl))/height(pupdat)) * 100; %percentage of unsuable data, left pupil
 

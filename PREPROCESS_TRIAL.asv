@@ -1,4 +1,4 @@
-%%%% PREPROCESS %%%%
+%% PREPROCESS
 clear all
 
 
@@ -106,6 +106,7 @@ options.blink_rule = 'vel';       % Rule for blink detection 'std' / 've
 % 
 % [pupdat_left_proc pupdat_left_info] = processPupilData(pupdat_left, options);
 
+
 %find blinks with velocity based function 
 % velocities faster than three times the median root mean square value of
 % all successive 500 ms windows over the entire trace are marked as blinks
@@ -152,7 +153,7 @@ pupdat(:,pupright_proc) = filtfilt(b, a, pupdat(:,pupright_proc));
 
 clearvars b a;
 
-%% de-clutter workspace again
+
 clearvars -except pupdat samplingfreq SUBJECT audiocompleteTimeD baseName baseNameString bin_buttonpress bin_buttonpress2 blankStartTimeD1 ButtonResponse ButtonRT ButtonRT2 ConfidenceRate EndofTrial_timeD ExpStartTimeD feedback FeedbackMessage fixStartTimeD1 fixStartTimeP1 fname1 grip_baseline grip_duration gripforce_fname GripRelaxTime inter_buttonpress inter_buttonpress2 iscorr isoddball isStrengthHi numCycles numreps numsegs NumStim numTrialReps relaxStartTimeD1 relaxStartTimeP1 Resp1_Duration Resp1EndTimeD Resp1StartTimeD Resp2_Duration Resp2EndTimeD Resp2StartTimeD SoundStartTimeD SoundStartTimeD1 StimLev StimLev1 stimulusStartTimeD
 
 

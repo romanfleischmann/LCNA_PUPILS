@@ -63,7 +63,7 @@ for k = 1:numel(files)
     savePath = fullfile(saveFolder, newFileName);
 
     % Clear vars
-    clearvars -except targetDir unusable_left unusable_right saveFolder files fileName fullPath newFileName savePath k SUBJECT audiocompleteTimeD baseName baseNameString bin_buttonpress bin_buttonpress2 blankStartTimeD1 ButtonResponse ButtonRT ButtonRT2 ConfidenceRate EndofTrial_timeD ExpStartTimeD feedback FeedbackMessage fixStartTimeD1 fname1 grip_baseline grip_duration gripforce_fname GripRelaxTime inter_buttonpress inter_buttonpress2 iscorr isoddball isStrengthHi numCycles numreps numsegs NumStim numTrialReps relaxStartTimeD1 Resp1_Duration Resp1EndTimeD Resp1StartTimeD Resp2_Duration Resp2EndTimeD Resp2StartTimeD SoundStartTimeD SoundStartTimeD1 StimLev StimLev1 stimulusStartTimeD;
+    clearvars -except pupdat targetDir unusable_left unusable_right saveFolder files fileName fullPath newFileName savePath k SUBJECT audiocompleteTimeD baseName baseNameString bin_buttonpress bin_buttonpress2 blankStartTimeD1 ButtonResponse ButtonRT ButtonRT2 ConfidenceRate EndofTrial_timeD ExpStartTimeD feedback FeedbackMessage fixStartTimeD1 fname1 grip_baseline grip_duration gripforce_fname GripRelaxTime inter_buttonpress inter_buttonpress2 iscorr isoddball isStrengthHi numCycles numreps numsegs NumStim numTrialReps relaxStartTimeD1 Resp1_Duration Resp1EndTimeD Resp1StartTimeD Resp2_Duration Resp2EndTimeD Resp2StartTimeD SoundStartTimeD SoundStartTimeD1 StimLev StimLev1 stimulusStartTimeD;
 
     % Exclude helper variables when saving
     varsToKeep = setdiff(who, {'targetDir','saveFolder','files','fileName','fullPath','newFileName','savePath','k'});

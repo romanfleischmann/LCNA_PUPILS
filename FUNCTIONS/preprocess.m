@@ -50,11 +50,11 @@ fixright  = 13;  % Right Fixation Flag (0=no, 1=yes)
 velblinkleft    = 17; % blinks detected by velocity change (1=yes, 0=no) 
 velblinkright   = 18; % blinks detected by velocity change (1=yes, 0=no) 
 pupleft_proc    = 19; % pupleft after processing
-pupleft_inter   = 20; % pupleft interpolated areas, safe to use
-pupleft_excl    = 21; % pupleft interpolated but NOT safe to use, excluded!
+pupleft_inter   = 20; % pupleft interpolated areas, safe to use (1=yes, 0=no) 
+pupleft_excl    = 21; % pupleft interpolated but NOT safe to use, excluded! (1=yes, 0=no) 
 pupright_proc   = 22; % pupright after processing
-pupright_inter  = 23; % pupright interpolated areas, safe to use
-pupright_excl   = 24; % pupright interpolated but NOT safe to use, excluded!
+pupright_inter  = 23; % pupright interpolated areas, safe to use (1=yes, 0=no) 
+pupright_excl   = 24; % pupright interpolated but NOT safe to use, excluded! (1=yes, 0=no) 
 
 %% initialize parameters
 samplingfreq = 2000; %Hz, because two samples per millisecond. But this does not track with the given frequency (1000 Hz)

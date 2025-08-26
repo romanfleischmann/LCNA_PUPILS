@@ -41,6 +41,7 @@ for k = 1:numel(files)
     
     % sync all other timestamps (check whether any timestamps you want to use
     % are here)
+    audiocompleteTimeD  = audiocompleteTimeD - difference;
     blankStartTimeD1    = blankStartTimeD1  - difference;
     EndofTrial_timeD    = EndofTrial_timeD  - difference;
     ExpStartTimeD       = ExpStartTimeD     - difference;
@@ -75,4 +76,6 @@ for k = 1:numel(files)
     % Clear vars
     clearvars -except saveFolder files k targetDir;
 end
+
+disp("all done cutie");
 

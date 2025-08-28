@@ -13,8 +13,9 @@ folderPath = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perpart\_Aoddball_'
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
 
-
+cnt = 1; % counter
 for k = 1:length(files)
+
     fullFilePath = fullfile(folderPath, files(k).name);  % Full path to the file
     disp(['Loading: ', fullFilePath])
     
@@ -43,10 +44,12 @@ for k = 1:length(files)
     
     % calculate averages per condition
     cfg.trials = temp_trials_cond1;
-    conditions{k,1} = ft_timelockanalysis(cfg,data_con);
+    conditions{cnt,1} = ft_timelockanalysis(cfg,data_con);
 
     cfg.trials = temp_trials_cond2;
-    conditions{k,2} = ft_timelockanalysis(cfg,data_con);
+    conditions{cnt,2} = ft_timelockanalysis(cfg,data_con);
+
+    cnt = cnt+1;
 end
   
 cfg = [];
@@ -59,10 +62,10 @@ condition2 = ft_timelockgrandaverage(cfg, conditions{:,2})
 
 %%%%%%%%%%%%%%%%%% PLOTTING
 
-% Extract time and average across channels
+% Extract time and data
 time = condition1.time;
-data1 = mean(condition1.avg, 1);   % average across channels
-data2 = mean(condition2.avg, 1);
+data1 = condition1.avg(1,:);   % only first channel, second is dilation rate
+data2 = condition2.avg(1,:);
 
 figure; hold on;
 
@@ -94,17 +97,15 @@ grid on;
 cfg         = [];
 cfg.channel = 'size';
 cfg.latency = [0 7200];      
-cfg.correctm = 'no';
-cfg_neighb        = [];         
+cfg.correctm = 'cluster';
+%cfg_neighb           = [];         
 cfg.method           = 'montecarlo';
-%cfg.statistic        = 'ft_statfun_depsamplesFunivariate';  %possible statistics, choose your warrior
-%cfg.statistic        =  'ft_statfun_indepsamplesF'
 cfg.statistic        = 'ft_statfun_depsamplesT';
 cfg.correctm         = 'cluster';
 cfg.clusteralpha     = 0.05;
 cfg.clusterstatistic = 'maxsum';
 cfg.minnbchan        = 1; %minimum cluster requirement
-cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
+%cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
 cfg.tail             = 0;
 cfg.clustertail      = 0;
 cfg.alpha            = 0.05;
@@ -113,7 +114,7 @@ cfg.numrandomization = 1000;
 
 %% design settings
 
-Nsubj  = 64;
+Nsubj  = 37;
 design = zeros(2, Nsubj*2);
 design(1,:) = [1:Nsubj 1:Nsubj];
 design(2,:) = [ones(1,Nsubj) ones(1,Nsubj)*2];
@@ -125,7 +126,7 @@ cfg.ivar   = 2;
 %% so lets finally do this
 
 
-[stat] = ft_timelockstatistics(cfg, conditions{k,1}, conditions{k,2})
+[stat] = ft_timelockstatistics(cfg, conditions{:,1}, conditions{:,2})
 
 
 

@@ -159,6 +159,7 @@ for i = 1:length(files)
     info.ExpStartTimeD      = round(ExpStartTimeD       * 1000) - info.stimulusStartTimeD;
     info.fixStartTimeD1     = round(fixStartTimeD1      * 1000) - info.stimulusStartTimeD;
     
+    info.stimulusStartTimeD =  info.stimulusStartTimeD -  info.stimulusStartTimeD; %normalized by itself, so everythings zero
 
     % Generate new filename with '_FT' added before the extension
     [~, name, ~] = fileparts(files(i).name);

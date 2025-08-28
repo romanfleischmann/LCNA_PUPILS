@@ -13,10 +13,11 @@ folderPath = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perpart\_Aoddball_'
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
 
+row_nr = 1; % for size
+row_nr = 2; % for dilation rate
+
 cnt = 1; % counter
 for k = 1:length(files)
-
-    
 
     fullFilePath = fullfile(folderPath, files(k).name);  % Full path to the file
     disp(['Loading: ', fullFilePath])
@@ -24,8 +25,8 @@ for k = 1:length(files)
     load(fullFilePath);  % Load the .mat file into a struct
 
     % temp trials is a logical defining the trial which fit our condition
-    %temp_trials_cond1 = logical(info_con.usable) & logical(info_con.isStrengthHi);
-    %temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.isStrengthHi);
+    % temp_trials_cond1 = logical(info_con.usable) & logical(info_con.isStrengthHi);
+    % temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.isStrengthHi);
 
     temp_trials_cond1 = logical(info_con.usable) & logical(info_con.isoddball);
     temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.isoddball);
@@ -39,9 +40,9 @@ for k = 1:length(files)
 
     % baselining 0 - 3000 ms (grip phase)
     for t = 1:length(data_con.trial)
-        data = data_con.trial{1, t}(1,:);        
+        data = data_con.trial{1, t}(row_nr,:);        
         baseline = mean(data(1, 1:3000));   % compute baseline for each column
-        data_con.trial{1, t}(1,:) = data - baseline; % subtract baseline
+        data_con.trial{1, t}(row_nr,:) = data - baseline; % subtract baseline
     end
     
     % calculate averages per condition
@@ -64,10 +65,10 @@ condition2 = ft_timelockgrandaverage(cfg, conditions{:,2})
 
 %%%%%%%%%%%%%%%%%% PLOTTING
 
-% Extract time and average across channels
+% Extract time and data
 time = condition1.time;
-data1 = mean(condition1.avg, 1);   % average across channels
-data2 = mean(condition2.avg, 1);
+data1 = condition1.avg(row_nr,:);   % only first channel, second is dilation rate
+data2 = condition2.avg(row_nr,:);
 
 figure; hold on;
 
@@ -97,19 +98,17 @@ grid on;
 %%%%%%%%%%%%%%%%%%%%%%%%% CLUSTER BASED PERMUTATION
 
 cfg         = [];
-cfg.channel = 'size';
+cfg.channel = 'dilr';
 cfg.latency = [0 7200];      
-cfg.correctm = 'no';
-cfg_neighb        = [];         
+cfg.correctm = 'cluster';
+%cfg_neighb           = [];         
 cfg.method           = 'montecarlo';
-%cfg.statistic        = 'ft_statfun_depsamplesFunivariate';  %possible statistics, choose your warrior
-%cfg.statistic        =  'ft_statfun_indepsamplesF'
 cfg.statistic        = 'ft_statfun_depsamplesT';
 cfg.correctm         = 'cluster';
 cfg.clusteralpha     = 0.05;
 cfg.clusterstatistic = 'maxsum';
 cfg.minnbchan        = 1; %minimum cluster requirement
-cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
+%cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
 cfg.tail             = 0;
 cfg.clustertail      = 0;
 cfg.alpha            = 0.05;
@@ -118,7 +117,7 @@ cfg.numrandomization = 1000;
 
 %% design settings
 
-Nsubj  = 37;
+Nsubj  = 37; % however many are still there after exclusions
 design = zeros(2, Nsubj*2);
 design(1,:) = [1:Nsubj 1:Nsubj];
 design(2,:) = [ones(1,Nsubj) ones(1,Nsubj)*2];
@@ -136,37 +135,3 @@ cfg.ivar   = 2;
 
 
 
-
-cfg         = [];
-cfg.channel = 'size';
-cfg.latency = [0 2.5];           % the data is already shortened to the epoch 0-0.5, so were doing the whole length yeeehaaaaw
-
-cfg_neighb        = [];         
-cfg_neighb.method = 'distance';
-%cfg.feedback = 'yes';
-neighbours        = ft_prepare_neighbours(cfg_neighb, conditions{1,2});
-
-cfg.neighbours    = neighbours;  % the neighbours specify for each sensor with
-                                 % which other sensors it can form clusters
-
-cfg.method           = 'montecarlo';
-cfg.statistic        = 'depsamplesT';
-cfg.correctm         = 'no';
-cfg.clusteralpha     = 0.05;
-cfg.clusterstatistic = 'maxsum';
-%cfg.minnbchan        = 1; %minimum cluster requirement
-cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
-cfg.tail             = 0;
-cfg.clustertail      = 0;
-cfg.alpha            = 0.05;
-cfg.numrandomization = 1000;
-
-design = []
-Nsubj  = 64;
-design = zeros(2, Nsubj*2);
-design(1,:) = [1:Nsubj 1:Nsubj ];
-design(2,:) = [ones(1,Nsubj) ones(1,Nsubj)*2];
-
-cfg.design = design;
-cfg.uvar   = 1;   %index in the design, set above
-cfg.ivar   = 2;

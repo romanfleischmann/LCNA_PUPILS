@@ -1,35 +1,7 @@
 %% C2 CONCATENATE BLOCKS PER PARTICIPANT
-
-clear all
-
-load('G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perblock\subjectBAP001_Aoddball_session2_run1_8_31_10_43_prep_FT.mat')
-
-
-
-% variables to concatenate 1x30
-info.usable, info.gooddata, info.stimulusStartTimeD, info.EndofTrial_timeD, info.blankStartTimeD1, info.audiocompleteTimeD, info.relaxStartTimeD1, info.Resp1EndTimeD, info.Resp1StartTimeD, info.Resp2EndTimeD, info.Resp2StartTimeD, info.SoundStartTimeD, info.SoundStartTimeD1, info.ExpStartTimeD, info.fixStartTimeD1
-
-info.StimLev
-
-info.inter_buttonpress, info.inter_buttonpress2, info.iscorr, info.isoddball, info.isStrengthHi
-info.ConfidenceRate, info.bin_buttonpress, info.ButtonResponse, info.ButtonRT, info.ButtonRT2
-info.bin_buttonpress2
-
-% variables to concatenate other format
-
-info.unusable_right, info.Resp1_Duration, info.Resp2_Duration, info.unusable_left
-info.resp1, info.numCycles, info.numreps, info.numsegs, info.NumStim, info.numTrialReps
-info.GripRelaxTime
-info.grip_duration, info.grip, info.grip_baseline
-info.FeedbackMessage, info.feedback
-
-
-% variables to make sure theyre the same
-info.baseNameString
-info.SUBJECT
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% full disclosure this one is built by AI, but i've checked it
+% and it does what it's supposed to be doing, its just incredibly
+% inefficient
 
 clear; clc;
 
@@ -47,14 +19,23 @@ files = dir(fullfile(sourceFolder, '*.mat'));
 [~, idx] = sort({files.name});
 files = files(idx);
 
+% Log file setup
+logFile = fullfile(saveFolder, 'concatenation_log.txt');
+fid = fopen(logFile, 'w');
+fprintf(fid, 'Concatenation Log\n');
+fprintf(fid, '=================\n\n');
+
 %--------------------------
 % 2. Initialize
 %--------------------------
-currentInfo = [];
+info_con = [];
+data_con = [];
 currentSubject = '';
 currentBase = '';
-blockCount = 1;
+fileCounter = 0;
+currentFiles = {};
 
+% Variables for horizontal concatenation in "info"
 vars_1x30 = {'usable','gooddata','stimulusStartTimeD','EndofTrial_timeD',...
     'blankStartTimeD1','audiocompleteTimeD','relaxStartTimeD1','Resp1EndTimeD',...
     'Resp1StartTimeD','Resp2EndTimeD','Resp2StartTimeD','SoundStartTimeD',...
@@ -73,44 +54,160 @@ vars_other = {'unusable_right','Resp1_Duration','Resp2_Duration','unusable_left'
 for i = 1:length(files)
     fprintf('Processing file %d of %d: %s\n', i, length(files), files(i).name);
     
-    data = load(fullfile(sourceFolder, files(i).name));
-    info = data.info;
+    % Load both info and data
+    load(fullfile(sourceFolder, files(i).name), 'info', 'data');
     
-    if isempty(currentInfo)
-        currentInfo = info;
+    % Initialize first subject/block
+    if isempty(currentSubject)
+        info_con = info;
+        data_con = data;
         currentSubject = info.SUBJECT;
         currentBase = info.baseNameString;
+        fileCounter = 1;
+        currentFiles = {files(i).name};
         continue;
     end
     
-    % Check if still same subject & baseNameString
-    if strcmp(currentSubject, info.SUBJECT) && strcmp(currentBase, info.baseNameString)
-        % Horizontal concatenation for 1x30 variables
+    % Same subject/base and not exceeding max of 5 files
+    if strcmp(currentSubject, info.SUBJECT) && strcmp(currentBase, info.baseNameString) && fileCounter < 5
+        % Concatenate INFO horizontally
         for v = vars_1x30
             vname = v{1};
-            currentInfo.(vname) = [currentInfo.(vname), info.(vname)]; % <- horizontal
+            info_con.(vname) = [info_con.(vname), info.(vname)];
         end
-        
-        % Horizontal concatenation for other variables
         for v = vars_other
             vname = v{1};
-            currentInfo.(vname) = [currentInfo.(vname), info.(vname)];
+            info_con.(vname) = [info_con.(vname), info.(vname)];
         end
-    else
-        % Save concatenated info
-        save(fullfile(saveFolder, sprintf('concat_%s_block%d.mat', currentSubject, blockCount)), 'currentInfo');
-        fprintf('Saved concatenated info for %s - block %d\n', currentSubject, blockCount);
         
-        % Reset for next subject/block
-        blockCount = 1;
-        currentInfo = info;
+        % Concatenate DATA
+        data_con.trial = [data_con.trial, data.trial];
+        data_con.time  = [data_con.time,  data.time];
+        % fsample, elec, label, cfg remain unchanged
+        
+        fileCounter = fileCounter + 1;
+        currentFiles{end+1} = files(i).name;
+        
+    else
+        % Make subfolder for baseName (Aoddball or Voddball)
+        baseFolder = fullfile(saveFolder, currentBase);
+        if ~exist(baseFolder, 'dir')
+            mkdir(baseFolder);
+        end
+        
+        % Save current concatenation
+        saveFileName = sprintf('concat_%s_%s.mat', currentSubject, currentBase);
+        save(fullfile(baseFolder, saveFileName), 'info_con', 'data_con', '-v7.3');
+        fprintf('Saved concatenated info/data for %s - %s (%d files)\n', currentSubject, currentBase, fileCounter);
+        
+        % Log entry
+        fprintf(fid, 'Subject: %s | Base: %s | Files combined: %d\n', currentSubject, currentBase, fileCounter);
+        for f = 1:length(currentFiles)
+            fprintf(fid, '    %s\n', currentFiles{f});
+        end
+        fprintf(fid, '\n');
+        
+        % Start new block
+        info_con = info;
+        data_con = data;
         currentSubject = info.SUBJECT;
         currentBase = info.baseNameString;
+        fileCounter = 1;
+        currentFiles = {files(i).name};
     end
 end
 
-% Save last accumulated block
-save(fullfile(saveFolder, sprintf('concat_%s_block%d.mat', currentSubject, blockCount)), 'currentInfo');
-fprintf('Saved final concatenated info for %s - block %d\n', currentSubject, blockCount);
+% Save final block
+baseFolder = fullfile(saveFolder, currentBase);
+if ~exist(baseFolder, 'dir')
+    mkdir(baseFolder);
+end
+saveFileName = sprintf('concat_%s_%s.mat', currentSubject, currentBase);
+save(fullfile(baseFolder, saveFileName), 'info_con', 'data_con', '-v7.3');
+fprintf('Saved final concatenated info/data for %s - %s (%d files)\n', currentSubject, currentBase, fileCounter);
 
-disp('Concatenation complete.');
+% Log final block
+fprintf(fid, 'Subject: %s | Base: %s | Files combined: %d\n', currentSubject, currentBase, fileCounter);
+for f = 1:length(currentFiles)
+    fprintf(fid, '    %s\n', currentFiles{f});
+end
+fprintf(fid, '\n');
+
+% Close log
+fclose(fid);
+
+disp('Concatenation complete. Log saved.');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this part takes really long because it reopens every file :(
+% 
+
+clear; clc;
+
+%--------------------------
+% Setup folders
+%--------------------------
+baseFolder = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perpart';
+subfolders = {'_Aoddball_', '_Voddball_'}; % Correct folder names with underscores
+
+for s = 1:length(subfolders)
+    folderPath = fullfile(baseFolder, subfolders{s});
+    
+    % Check if subfolder exists
+    if ~exist(folderPath, 'dir')
+        fprintf('Warning: Folder "%s" does not exist. Skipping...\n', folderPath);
+        continue;
+    end
+    
+    files = dir(fullfile(folderPath, 'concat_*.mat'));
+    
+    if isempty(files)
+        fprintf('No files found in %s. Skipping...\n', folderPath);
+        continue;
+    end
+    
+    % Storage for percentages
+    percentages = [];
+    subjects = {};
+    
+    for i = 1:length(files)
+        disp(['Processing file ' num2str(i) ' of ' num2str(length(files)) ': ' files(i).name]);
+        
+        load(fullfile(folderPath, files(i).name), 'info_con');
+        
+        % Calculate percentage usable for this file
+        perc = mean(info_con.usable) * 100;
+        percentages(end+1) = perc;
+        
+        % Extract subject name
+        subjects{end+1} = info_con.SUBJECT;
+    end
+    
+    % Calculate overall average for this condition
+    overallAvg = mean(percentages);
+    
+    % Path for summary text file
+    txtFile = fullfile(folderPath, 'usable_summary.txt');
+    fid = fopen(txtFile, 'w');
+    
+    if fid == -1
+        error('Could not create summary file in folder: %s', folderPath);
+    end
+    
+    % Write per-subject percentages
+    fprintf(fid, 'Usable Trials Summary (%s)\n', subfolders{s});
+    fprintf(fid, '==========================\n\n');
+    
+    for i = 1:length(subjects)
+        fprintf(fid, '%s: %.2f%% usable\n', subjects{i}, percentages(i));
+    end
+    
+    % Write overall average
+    fprintf(fid, '\nOverall Average: %.2f%% usable\n', overallAvg);
+    
+    fclose(fid);
+    
+    disp(['Finished folder: ' subfolders{s} ' — summary saved in usable_summary.txt']);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -96,7 +96,7 @@ for i = 1:length(files)
         dilrate = diff(data.trial{1, trial}(1,:));
         
         %dilrate is missing one sample due to diff(), adding last sample twice to
-        %make both arrays equally long. This introduces 0.5 ms of desynchronization, which im choosing to ignore
+        %make both arrays equally long. This introduces 1 ms of desynchronization, which im choosing to ignore
         dilrate = horzcat(dilrate, dilrate(end));
         
         %add dilrate as second channel to the matrix

@@ -7,7 +7,7 @@ function [pupdat unusable_left unusable_right] = preprocess(bufferData)
 % preprocessing steps
 % 1. Set all marked "blink" to NaN (per eye)
 
-% 2. Set all values over 1000 to NaN (corrupted data)
+% 2. Set all values over 1000 to NaN (blinks, possibly corrupted data data)
 
 % 3. Find more blinks based on the velocity (bc. we do not trust the
 % markings from the tracker alone) and set to NaN (per eye)
@@ -132,7 +132,7 @@ clearvars interpol_bad_left interpol_bad_right interpol_good_left interpol_good_
 % attenuating above 5Hz 
 
 % set filter parameters
-fc = 5; % attenuate under 10Hz
+fc = 5; % attenuate under 5Hz
 [b,a] = butter(4,fc/(samplingfreq/2));
 
 % filter

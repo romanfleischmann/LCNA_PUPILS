@@ -4,6 +4,7 @@ clear all
 % fot this skript to work the PUPILS toolbox needs to be on the path
 % (https://arxiv.org/abs/2011.05118)
 
+%%%%%% PATHS %%%%%%
 % paths for windows
 cd('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS') %windowspath
 addpath(genpath('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS'))
@@ -11,6 +12,7 @@ addpath(genpath('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS'))
 % folders
 targetDir = 'G:\My Drive\SHARE\SHARE4ANDREW\raw';
 saveFolder = 'G:\My Drive\SHARE\SHARE4ANDREW\preprocessed';
+%%%%%% PATHS END %%%%%%
 
 % all mat files in  folder
 files = dir(fullfile(targetDir, '*.mat'));
@@ -33,7 +35,7 @@ for k = 1:numel(files)
         continue;  % skip to next iteration
     end
 
-    % normalize timestamppp
+    % normalize timestamppppppppp
     [bufferData, difference] = normalize_timestamp(bufferData);
 
     % preprocess
@@ -41,7 +43,7 @@ for k = 1:numel(files)
     
     % sync all other timestamps (check whether any timestamps you want to use
     % are here)
-    audiocompleteTimeD  = audiocompleteTimeD - difference;
+    audiocompleteTimeD  = audiocompleteTimeD - difference; 
     blankStartTimeD1    = blankStartTimeD1  - difference;
     EndofTrial_timeD    = EndofTrial_timeD  - difference;
     ExpStartTimeD       = ExpStartTimeD     - difference;
@@ -77,5 +79,5 @@ for k = 1:numel(files)
     clearvars -except saveFolder files k targetDir;
 end
 
-disp("all done cutie");
+disp("all doneeeeeeeee");
 

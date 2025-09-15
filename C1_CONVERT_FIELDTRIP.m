@@ -3,9 +3,8 @@
 
 clear all
 
-% load random data to try
-% load('G:\My Drive\SHARE\SHARE4ANDREW\preprocessed\subjectBAP108_Voddball_session3_run5_9_2_10_43_prep.mat')
 
+%%%%%%% PATHS %%%%%%%
 % paths for windows 
 cd('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS') %windowspath
 addpath(genpath('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS'))
@@ -13,6 +12,8 @@ addpath(genpath('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS'))
 % Define source and destination folders
 srcFolder = 'G:\My Drive\SHARE\SHARE4ANDREW\preprocessed';
 destFolder = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perblock';
+
+%%%%%%% PATHS END %%%%%%%
 
 % Create destination folder if it does not exist
 if ~exist(destFolder, 'dir')
@@ -27,6 +28,8 @@ load('G:\My Drive\SHARE\SHARE4ANDREW\data_fieldtrip.mat');
 data = [];
 data = exampleFT;
 
+% these values all relate to timeperiods from the sketched out experimental
+% design (LC project eyetracking.pdf), together they form the epoch
 trial = 1;
 grip = 3000; % ms
 blank = 250; % ms
@@ -38,7 +41,7 @@ resp1 = 3000, % ms (lets see how much sense it makes looking at this period)
 
 length_epoch = grip + blank + stim1 + ISI + stim2 + blank2 + resp1; % this is in ms
 
-tic
+tic %this takes long
 for i = 1:length(files)
     % Get full path of current file
     srcFile = fullfile(srcFolder, files(i).name);
@@ -47,9 +50,8 @@ for i = 1:length(files)
     fprintf('Processing file: %s\n', files(i).name);
     load(srcFile);
 
-
     % downsampling and converting to milliseconds because floating point errors
-    % are driving my fucking nuts i hate matlab so much
+    % are driving me nuts 
     pupdat = downsample(pupdat,2);
     pupdat(:,1) = pupdat(:,1) * 1000;
     pupdat(:,1) = round(pupdat(:,1)); % rounding to nearest ms

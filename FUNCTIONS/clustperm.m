@@ -1,20 +1,7 @@
-%% D1 ANALYSIS 1
-
-clear; clc;
-
-cfg = [];
-cfg.latency = [0 7200]; %this is the epoch set in skript C1
-
-%%%%% FOLDERS %%%%%%
-% Specify the folder
-folderPath = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perpart\_Aoddball_';
-%%%%% FOLDERS END %%%%%%
+function [condition1 condition2, stat] = clustperm(folderPath, row_nr, variable_condition, cfg)
 
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
-
-row_nr = 1; % for size
-row_nr = 2; % for dilation rate
 
 cnt = 1; % counter
 for k = 1:length(files)
@@ -25,12 +12,8 @@ for k = 1:length(files)
     load(fullFilePath);  % Load the .mat file into a struct
 
     % temp trials is a logical defining the trial which fit our condition
-    % temp_trials_cond1 = logical(info_con.usable) & logical(info_con.isStrengthHi);
-    % temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.isStrengthHi);
-
-    % temp trials is a logical defining the trial which fit our condition
-    temp_trials_cond1 = logical(info_con.usable) & logical(info_con.isoddball);
-    temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.isoddball);
+    temp_trials_cond1 = logical(info_con.usable) & logical(info_con.(variable_condition));
+    temp_trials_cond2 = logical(info_con.usable) & ~logical(info_con.(variable_condition));
 
     % Skip iteration if both are entirely false --> this would mean that
     % one condition has no trials
@@ -68,8 +51,8 @@ condition2 = ft_timelockgrandaverage(cfg, conditions{:,2})
 
 % Extract time and data
 time = condition1.time;
-data1 = condition1.avg(row_nr,:);   % only first channel, second is dilation rate
-data2 = condition2.avg(row_nr,:);
+data1 = condition1.avg(1,:);   % only one hannel left
+data2 = condition2.avg(1,:);
 
 figure; hold on;
 
@@ -98,9 +81,9 @@ grid on;
 
 %%%%%%%%%%%%%%%%%%%%%%%%% CLUSTER BASED PERMUTATION
 
-cfg         = [];
-cfg.channel = 'dilr';
-cfg.latency = [0 7200];      
+%cfg         = [];
+%cfg.channel = 'dilr';
+%cfg.latency = [0 7200];      
 cfg.correctm = 'cluster';
 %cfg_neighb           = [];         
 cfg.method           = 'montecarlo';
@@ -129,9 +112,5 @@ cfg.ivar   = 2;
 
 %% so lets finally do this
 
+
 [stat] = ft_timelockstatistics(cfg, conditions{:,1}, conditions{:,2})
-
-
-
-
-

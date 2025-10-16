@@ -60,7 +60,6 @@ for i = 1:length(files)
     gooddata = [];
     usable = [];
     
-    
     for trial = 1:30;
     
         start_epoch = [];
@@ -70,18 +69,17 @@ for i = 1:length(files)
         start_epoch = stimulusStartTimeD(trial)* 1000; % to ms
         start_epoch = round(start_epoch); % rounding to the nearest millisecond
         
-        
         % check whether to use left, right or no eye at all
         % columns 21 and 24 contain whether data is usable (1=yes, 0=no) 
         % see function: preprocess
         % then copy the pupilsize from the "healthy" side (if there is one at all)
         end_epoch = start_epoch+length_epoch-1;
         
-        if ~any(pupdat(start_epoch:end_epoch, 21))
+        if ~any(pupdat(start_epoch+grip:end_epoch, 21))
             gooddata{trial} = 'left';
             usable(trial) = 1;
             data.trial{1, trial}(1,:) = pupdat(start_epoch:end_epoch, 19)';
-        elseif ~any(pupdat(start_epoch:start_epoch+length_epoch, 24))
+        elseif ~any(pupdat(start_epoch+grip:end_epoch, 24))
             gooddata{trial} = 'right';
             usable(trial) = 1;
             data.trial{1, trial}(1,:) = pupdat(start_epoch:end_epoch, 22)';

@@ -17,6 +17,7 @@ saveFolder = 'G:\My Drive\SHARE\SHARE4ANDREW\preprocessed';
 % all mat files in  folder
 files = dir(fullfile(targetDir, '*.mat'));
 
+tic;
 % Looooop over files
 for k = 1:numel(files)
     fileName = files(k).name;
@@ -81,3 +82,4 @@ end
 
 disp("all doneeeeeeeee");
 
+toc;

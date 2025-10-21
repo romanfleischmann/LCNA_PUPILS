@@ -73,6 +73,11 @@ condition2 = ft_timelockgrandaverage(cfg, conditions{:,2})
 
 %%%%%%%%%%%%%%%%%% PLOTTING
 
+% Extract time and data
+time = condition1.time;
+data1 = condition1.avg(1,:);   % only one hannel left
+data2 = condition2.avg(1,:);
+
 % Compute mean and SEM across trials
 n1 = size(all_trials1, 1);
 n2 = size(all_trials2, 1);
@@ -118,7 +123,7 @@ legend({'Cond 1 ± SEM','Cond 2 ± SEM'}, 'Location','best');
 grid on; box off;
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%% CLUSTER BASED PERMUTATION
+%%%%%%%%%%%%%%%%%%%%%%%%% CLUSTER BASED PERMUTATION
 %cfg         = [];
 %cfg.channel = 'dilr';
 %cfg.latency = [0 7200];      
@@ -130,13 +135,15 @@ cfg.correctm         = 'cluster';
 cfg.clusteralpha     = 0.05;
 cfg.clusterstatistic = 'maxsum';
 cfg.minnbchan        = 1; %minimum cluster requirement
-%cfg.neighbours       = neighbours;  
+%cfg.neighbours       = neighbours;  % same as defined for the between-trials experiment
 cfg.tail             = 0;
 cfg.clustertail      = 0;
-cfg.alpha            = 0.025;
+cfg.alpha            = 0.05;
 cfg.numrandomization = 1000;
 
+
 %% design settings
+
 Nsubj  = height(conditions); % however many are still there after exclusions
 design = zeros(2, Nsubj*2);
 design(1,:) = [1:Nsubj 1:Nsubj];
@@ -147,6 +154,8 @@ cfg.uvar   = 1;   %index in the design, set above
 cfg.ivar   = 2;
 
 %% so lets finally do this
+
+
 [stat] = ft_timelockstatistics(cfg, conditions{:,1}, conditions{:,2})
 
 disp(['number of participants per condition: ', num2str(height(conditions))]);

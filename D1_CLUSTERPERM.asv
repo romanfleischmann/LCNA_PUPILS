@@ -1,3 +1,4 @@
+
 clear; clc;
 
 %%%%% FOLDERS %%%%%%
@@ -64,7 +65,5 @@ variable_condition = 'isStrengthHi';
 [condition1 condition2 stat all_strength_dilr1 all_strength_dilr2] = clustperm(folderPath, row_nr, variable_condition, cfg);
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%% PLOTTING ALL FOUR
-% all four conditions into one plot from here
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% 

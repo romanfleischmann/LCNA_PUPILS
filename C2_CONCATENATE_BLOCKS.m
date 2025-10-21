@@ -4,7 +4,7 @@
 % inefficient
 
 clear; clc;
-
+tic;
 %--------------------------
 % 1. Setup paths and files
 %--------------------------
@@ -209,5 +209,5 @@ for s = 1:length(subfolders)
     
     disp(['Finished folder: ' subfolders{s} ' — summary saved in usable_summary.txt']);
 end
-
+toc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

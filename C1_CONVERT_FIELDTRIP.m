@@ -3,7 +3,6 @@
 
 clear all
 
-
 %%%%%%% PATHS %%%%%%%
 % paths for windows 
 cd('C:\Users\rfleischmann\Documents\GitHub\LCNA_PUPILS') %windowspath
@@ -73,6 +72,10 @@ for i = 1:length(files)
         % columns 21 and 24 contain whether data is usable (1=yes, 0=no) 
         % see function: preprocess
         % then copy the pupilsize from the "healthy" side (if there is one at all)
+
+        % to not exclude too much data this script now only checks the part
+        % of the epoch after the grip os completed! 
+        % (start_epoch+grip:end_epoch)
         end_epoch = start_epoch+length_epoch-1;
         
         if ~any(pupdat(start_epoch+grip:end_epoch, 21))

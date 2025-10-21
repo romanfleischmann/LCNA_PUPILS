@@ -1,4 +1,4 @@
-function [condition1 condition2, stat all_trials1 all_trials2] = clustperm(folderPath, row_nr, variable_condition, cfg)
+function [condition1 condition2, stat all_trials1 all_trials2] = clustperm(folderPath, row_nr, variable_condition, cfg, savefig)
 
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
@@ -150,3 +150,28 @@ cfg.ivar   = 2;
 [stat] = ft_timelockstatistics(cfg, conditions{:,1}, conditions{:,2})
 
 disp(['number of participants per condition: ', num2str(height(conditions))]);
+
+%% Save figure
+
+fileName = ['fig_', variable_condition, '_', cfg.channel]; 
+
+% Ensure the folder exists
+if ~exist(savefig, 'dir')
+    mkdir(savefig);
+end
+
+figWidth = 14;             % width in inches
+figHeight = 4;            % height in inches
+dpi = 300;                % resolution for PNG
+fig = gcf; % use current figure (or replace with your handle)
+set(fig, 'Units', 'inches', 'Position', [1 1 figWidth figHeight]);
+set(fig, 'PaperUnits', 'inches', 'PaperSize', [figWidth figHeight], ...
+         'PaperPosition', [0 0 figWidth figHeight]);
+
+% === File paths ===
+pngFile = fullfile(savefig, [fileName '.png']);
+
+% === Save in both formats ===
+exportgraphics(fig, pngFile, 'Resolution', dpi);
+
+fprintf('Saved PNG and SVG to:\n%s\n', savefig);

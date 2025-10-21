@@ -1,4 +1,4 @@
-function [condition1 condition2, all_trials1 all_trials2] = plot_diff_conditions(folderPath, row_nr)
+function [condition1 condition2, all_trials1 all_trials2] = plot_diff_conditions(folderPath, row_nr, savefig)
 
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
@@ -68,14 +68,14 @@ end
 % all_trials_oddbdiff_hi = all_trials_nodd_hi - avg_oddball_hi;
 % all_trials_oddbdiff_lo = all_trials_nodd_lo - avg_oddball_lo;
 
-
 amt_data_hi = height(all_trials_odd_hi);
 amt_data_lo = height(all_trials_odd_lo);
 all_trials_oddbdiff_hi = all_trials_nodd_hi(1:amt_data_hi, :) - all_trials_odd_hi;
-all_trials_oddbdiff_lo = all_trials_nodd_hi(1:amt_data_hi, :) - all_trials_odd_hi;
+all_trials_oddbdiff_lo = all_trials_nodd_lo(1:amt_data_lo, :) - all_trials_odd_lo;
 
 
 %%%%%%%%%%%%%%%%%% PLOTTING
+str_array = ["size", "dilr"];
 
 % Compute mean and SEM across trials
 n1 = size(all_trials_oddbdiff_hi, 1);
@@ -117,7 +117,33 @@ xline(resp_wind_onset, '--k', 'LineWidth', 1.5);
 % labels and stuff 
 xlabel('time (ms)');
 ylabel('delta Noddball-oddball');
-title(['Nonoddball-oddball (Mean ± SEM) per strength']);
+title(['Nonoddball-oddball (Mean ± SEM) per strength: ', str_array(row_nr)]);
 legend({'Cond 1 ± SEM','Cond 2 ± SEM'}, 'Location','best');
 grid on; box off;
 
+
+%% Save figure
+
+
+fileName = ['fig_', variable_condition, '_', cfg.channel]; 
+
+% Ensure the folder exists
+if ~exist(savefig, 'dir')
+    mkdir(savefig);
+end
+
+figWidth = 14;             % width in inches
+figHeight = 4;            % height in inches
+dpi = 300;                % resolution for PNG
+fig = gcf; % use current figure (or replace with your handle)
+set(fig, 'Units', 'inches', 'Position', [1 1 figWidth figHeight]);
+set(fig, 'PaperUnits', 'inches', 'PaperSize', [figWidth figHeight], ...
+         'PaperPosition', [0 0 figWidth figHeight]);
+
+% === File paths ===
+pngFile = fullfile(savefig, [fileName '.png']);
+
+% === Save in both formats ===
+exportgraphics(fig, pngFile, 'Resolution', dpi);
+
+fprintf('Saved PNG and SVG to:\n%s\n', savefig);

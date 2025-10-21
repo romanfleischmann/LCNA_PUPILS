@@ -4,6 +4,9 @@ clear; clc;
 % Specify the folder, either the Oddball folder or the Voddball folder
 folderPath = 'G:\My Drive\SHARE\SHARE4ANDREW\Fieldtripformat\perpart\_Aoddball_';
 
+% save figure to this
+savefig = 'G:\My Drive\SHARE\SHARE4ANDREW\figures'
+
 % Get a list of all .mat files in the folder
 files = dir(fullfile(folderPath, '*.mat'));
 %%%%% FOLDERS END %%%%%%
@@ -19,7 +22,7 @@ row_nr = 2; % for dilation rate, has to fit the "channel" in cfg
 variable_condition = 'isoddball';
 
 % run test
-[condition1 condition2 stat all_odd_dilr1 all_odd_dilr2] = clustperm(folderPath, row_nr, variable_condition, cfg);
+[condition1 condition2 stat all_odd_dilr1 all_odd_dilr2] = clustperm(folderPath, row_nr, variable_condition, cfg, savefig);
 
 
 %%%% CLUSTER BASED PERMUTATION FOR PUPIL SIZE, ODDBALL VS NON-ODDBALL
@@ -33,7 +36,7 @@ row_nr = 1; % for size, has to fit the "channel" in cfg
 variable_condition = 'isoddball';
 
 % run test
-[condition1 condition2 stat all_odd_size1 all_odd_size2] = clustperm(folderPath, row_nr, variable_condition, cfg);
+[condition1 condition2 stat all_odd_size1 all_odd_size2] = clustperm(folderPath, row_nr, variable_condition, cfg, savefig);
 
 
 %%%% CLUSTER BASED PERMUTATION FOR PUPIL SIZE, HiStrength vs. Low Strength
@@ -47,7 +50,7 @@ row_nr = 1; % for size, has to fit the "channel" in cfg
 variable_condition = 'isStrengthHi';
 
 % run test
-[condition1 condition2 stat all_strength_size1 all_strength_size2] = clustperm(folderPath, row_nr, variable_condition, cfg);
+[condition1 condition2 stat all_strength_size1 all_strength_size2] = clustperm(folderPath, row_nr, variable_condition, cfg, savefig);
 
 
 %%%% CLUSTER BASED PERMUTATION FOR dilation rate, HiStrength vs. Low Strength
@@ -61,10 +64,15 @@ row_nr = 2; % for dilrate, has to fit the "channel" in cfg
 variable_condition = 'isStrengthHi';
 
 % run test
-[condition1 condition2 stat all_strength_dilr1 all_strength_dilr2] = clustperm(folderPath, row_nr, variable_condition, cfg);
+[condition1 condition2 stat all_strength_dilr1 all_strength_dilr2] = clustperm(folderPath, row_nr, variable_condition, cfg, savefig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%% PLOTTING ALL FOUR
 % all four conditions into one plot from here
 
+row_nr = 1;
+[all_trials_oddbdiff_hi, all_trials_oddbdiff_lo] = plot_diff_conditions(folderPath, row_nr, savefig);
+
+row_nr = 2;
+[all_trials_oddbdiff_hi, all_trials_oddbdiff_lo] = plot_diff_conditions(folderPath, row_nr, savefig);
 

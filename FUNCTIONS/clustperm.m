@@ -29,7 +29,7 @@ for k = 1:length(files)
     % end
 
     % Skip iteration if at least one condition has less trials than 20
-    if sum(temp_trials_cond1)<20 || sum(temp_trials_cond2)<20
+    if sum(temp_trials_cond1)<10 || sum(temp_trials_cond2)<10
         disp('excluded');
         continue;  % Go to next iteration
     end
